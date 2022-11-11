@@ -30,16 +30,15 @@ def on_message(client, userdata, msg):
 
 # print which topic was subscribed to
 def on_subscribe(client, userdata, mid, granted_qos, properties=None):
-    st_print("-"*100)
-    st_print("Subscribed: " + str(mid) + " " + str(granted_qos))
-    st_print(f"User data: {userdata}")
-    st_print("-" * 100)
+    # st_print("MQTT subscribed successful: " + str(mid) + " " + str(granted_qos))
+    st_print(f"MQTT subscribed successful: {userdata}")
+    # st_print(f"User data: {userdata}")
 
 
 def on_connect(client, userdata, flags, rc, properties=None):
-    st_print(f"CONNACK received with code {type(rc)}, {str(rc)}")
+    # st_print(f"CONNACK received with code {type(rc)}, {str(rc)}")
     if str(rc) == "Success":
-        st_print("connected to MQTT broker")
+        st_print("MQTT connected to broker")
         client.connected_flag = True  # set flag
     else:
         st_print(f"Bad connection to MQTT broker, returned code={rc}")
@@ -50,6 +49,9 @@ def on_publish(client, userdata, mid):
 
 
 async def mqtt_periodic():
+    map_zoom = 13
+    map_pitch = 25
+
     global boxbox_dict
     empty_cols = st.empty()
     col1, col2, col3, col4, col5 = empty_cols.columns(5)
@@ -97,7 +99,7 @@ async def mqtt_periodic():
 
                 col1, col2 = gps_cols.columns(2)
                 col1.metric("GPS Lat", gps_lat)
-                col2.metric("GPS lon", gps_lon)
+                col2.metric("GPS Lon", gps_lon)
 
                 col1, col2 = pred_cols.columns(2)
                 col1.metric("Pred Lat", pred_lat)
@@ -110,7 +112,8 @@ async def mqtt_periodic():
 
                 df = pd.DataFrame(lat_lons, columns=['gps_lat', 'gps_lon', 'pred_lat', 'pred_lon'])
 
-                get_pdk(strt_map, df, center_lat=gps_lat, center_lon=gps_lon, zoom=11, pitch=50, map_style='road')
+                get_pdk(strt_map, df, center_lat=gps_lat, center_lon=gps_lon, zoom=map_zoom, pitch=map_pitch,
+                        map_style='road')
 
                 boxbox_dict = None
         else:
