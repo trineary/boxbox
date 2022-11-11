@@ -7,6 +7,10 @@ from paho.mqtt import client as mqtt
 import paho.mqtt.client as paho
 
 
+def on_disconnect(client, userdata,rc=0):
+    client.loop_stop()
+
+
 def get_mqtt_client(mqtt_un, mqtt_pw, mqtt_conn_str, on_connect=None, on_subscribe=None, on_message=None, on_publish=None):
     """Return the MQTT client object."""
     _mqtt_client = mqtt.Client(client_id="", userdata=None, protocol=paho.MQTTv5)
@@ -17,6 +21,7 @@ def get_mqtt_client(mqtt_un, mqtt_pw, mqtt_conn_str, on_connect=None, on_subscri
     _mqtt_client.on_message = on_message
     _mqtt_client.on_publish = on_publish
     _mqtt_client.on_connect = on_connect
+    _mqtt_client.on_disconnect = on_disconnect
 
     # enable TLS for secure connection
     _mqtt_client.tls_set(tls_version=mqtt.ssl.PROTOCOL_TLS)
