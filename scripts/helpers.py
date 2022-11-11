@@ -14,39 +14,29 @@ def get_config(config_filepath: str) -> dict:
     return config
 
 
-def get_pdk(st_empty, df, center_lat, center_lon):
+def get_pdk(st_empty, df, center_lat, center_lon, zoom=11, pitch=50, map_style='road'):
     st_empty.pydeck_chart(pdk.Deck(
-        map_style='road',
+        map_style=map_style,
         initial_view_state=pdk.ViewState(
             latitude=center_lat,
             longitude=center_lon,
-            zoom=11,
-            pitch=50,
+            zoom=zoom,
+            pitch=pitch,
         ),
         layers=[
-        #     pdk.Layer(
-        #        'HexagonLayer',
-        #        data=df,
-        #        get_position='[lon, lat]',
-        #        radius=200,
-        #        elevation_scale=4,
-        #        elevation_range=[0, 1000],
-        #        pickable=True,
-        #        extruded=True,
-        #     ),
             pdk.Layer(
                 'ScatterplotLayer',
                 data=df,
-                get_position='[lon, lat]',
+                get_position='[gps_lon, gps_lat]',
                 get_color='[200, 30, 0, 160]',
-                get_radius=200,
+                get_radius=100,
             ),
             pdk.Layer(
                 'ScatterplotLayer',
                 data=df,
-                get_position='[lon_pred, lat_pred]',
+                get_position='[pred_lon, pred_lat]',
                 get_color='[0, 30, 200, 160]',
-                get_radius=200,
+                get_radius=100,
             ),
         ],
     ))

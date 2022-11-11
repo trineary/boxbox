@@ -60,6 +60,16 @@ async def mqtt_periodic():  # test, cols, strt_map, anom_map):
     col4.metric("Sat Cnt", "0")
     col5.metric("Uptime", "0")
 
+    gps_cols = st.empty()
+    col1, col2 = gps_cols.columns(2)
+    col1.metric("GPS Lat", "0")
+    col2.metric("GPS lon", "0")
+
+    pred_cols = st.empty()
+    col1, col2 = pred_cols.columns(2)
+    col1.metric("Pred Lat", "0")
+    col2.metric("Pred Lon", "0")
+
     # st.map()
     strt_map = st.empty()
     start_time = datetime.datetime.now()
@@ -91,16 +101,25 @@ async def mqtt_periodic():  # test, cols, strt_map, anom_map):
                 col5.metric("Uptime", box_data["up_time"])
 
                 # Plot lat/lon
-                lat, lon, lat_pred, lon_pred = float(box_data['lat']), float(box_data['long']), \
-                                               float(box_data['lat_pred']), float(box_data['long_pred'])
-                if lat_lons is None:
-                    lat_lons = np.array([[lat, lon, lat_pred, lon_pred]])
-                    lat_lons = np.append(lat_lons, [[lat, lon, lat_pred, lon_pred]], axis=0)
-                    lat_lons = np.append(lat_lons, [[lat, lon, lat_pred, lon_pred]], axis=0)
-                else:
-                    lat_lons = np.append(lat_lons, [[lat, lon, lat_pred, lon_pred]], axis=0)
+                gps_lat, gps_lon, pred_lat, pred_lon = float(box_data['gps_lat']), float(box_data['gps_lon']), float(box_data['pred_lat']), float(box_data['pred_lon'])
 
-                df = pd.DataFrame(lat_lons, columns=['lat', 'lon', 'lat_pred', 'lon_pred'])
+                col1, col2 = gps_cols.columns(2)
+                col1.metric("GPS Lat", gps_lat)
+                col2.metric("GPS lon", gps_lon)
+
+                col1, col2 = pred_cols.columns(2)
+                col1.metric("Pred Lat", pred_lat)
+                col2.metric("Pred Lon", pred_lon)
+
+                if lat_lons is None:
+                    lat_lons = np.array([[gps_lat, gps_lon, pred_lat, pred_lon]])
+                    # lat_lons = np.append(lat_lons, [[gps_lat, gps_lon, pred_lat, pred_lon]], axis=0)
+                    # lat_lons = np.append(lat_lons, [[gps_lat, gps_lon, pred_lat, pred_lon]], axis=0)
+                else:
+                    lat_lons = np.append(lat_lons, [[gps_lat, gps_lon, pred_lat, pred_lon]], axis=0)
+
+                df = pd.DataFrame(lat_lons, columns=['gps_lat', 'gps_lon', 'pred_lat', 'pred_lon'])
+                # st.write(f"latlons: {df.shape}, {df}")
                 # st.map
                 # if zoom is None:
                 #     map_ref = strt_map.map(df)
@@ -108,13 +127,13 @@ async def mqtt_periodic():  # test, cols, strt_map, anom_map):
                 # else:
                 #     strt_map.map(df, zoom=9, use_container_width=False)
 
-                if zoom is None:
-                    # map_ref = strt_map.map(df)
-                    get_pdk(strt_map, df, center_lat=lat, center_lon=lon)
-                    st.write(f"street map info: {map_ref}")
-                else:
-                    # strt_map.map(df, zoom=9, use_container_width=False)
-                    get_pdk(strt_map, df, center_lat=lat, center_lon=lon)
+                # if zoom is None:
+                #     # map_ref = strt_map.map(df)
+                #     get_pdk(strt_map, df, center_lat=gps_lat, center_lon=gps_lon, zoom=11, pitch=50, map_style='road')
+                #     # st.write(f"street map info: {map_ref}")
+                # else:
+                #     # strt_map.map(df, zoom=9, use_container_width=False)
+                get_pdk(strt_map, df, center_lat=gps_lat, center_lon=gps_lon, zoom=11, pitch=50, map_style='road')
 
                 # if fig is not None:
                 #     # st.write(f'range: {fig["layout"]}')
@@ -154,7 +173,7 @@ config = get_config("./config/config.yml")
 
 # Let user select which box to listen to
 box_select = st.selectbox('BoxBox Selection:', config['topics'])
-st.write('Selection: ', box_select)
+# st.write('Selection: ', box_select)
 
 # viewer = st.image(get_random_numpy(), width=VIEWER_WIDTH)
 
@@ -162,7 +181,7 @@ MQTT_UN = st.secrets["MQTT_UN"]
 MQTT_PW = st.secrets["MQTT_PW"]
 MQTT_CONN_STR = st.secrets["MQTT_CONN_STR"]
 
-st_print("mqtt_client in session state: " + str('mqtt_client' in st.session_state))
+# st_print("mqtt_client in session state: " + str('mqtt_client' in st.session_state))
 
 re_init_mqtt = False
 
@@ -177,7 +196,7 @@ if "box_select" in st.session_state:
         re_init_mqtt = True
 
 if re_init_mqtt is True and box_select is not None:
-    st_print("Initializing mqtt client.")
+    # st_print("Initializing mqtt client.")
     if "mqtt_client" in st.session_state:
         st.session_state.mqtt_client.loop_stop(force=True)
         st.write("Stopping mqtt before restarting")
@@ -189,10 +208,10 @@ if re_init_mqtt is True and box_select is not None:
     # st.session_state.mqtt_client.subscribe("boxbox/ground", qos=1)
     st.session_state.mqtt_client.subscribe(box_select, qos=1)
 
-    st.write("Finished initializing mqtt client")
+    # st.write("Finished initializing mqtt client")
     sleep(4.0)
 
-st_print("pre asyncio")
+# st_print("pre asyncio")
 
 
 # test = st.empty()
