@@ -11,9 +11,10 @@ import pandas as pd
 import streamlit as st
 # import yaml
 import asyncio
+import plotly.express as px
 
 from scripts.mqtt import get_mqtt_client
-from scripts.helpers import get_config
+from scripts.helpers import get_config, get_pdk
 
 boxbox_dict = None
 
@@ -59,11 +60,17 @@ async def mqtt_periodic():  # test, cols, strt_map, anom_map):
     col4.metric("Sat Cnt", "0")
     col5.metric("Uptime", "0")
 
+    # st.map()
     strt_map = st.empty()
     start_time = datetime.datetime.now()
     test = st.empty()
     dict_str = st.empty()
     lat_lons = None
+    xrange_0 = None
+    xrange_1 = None
+    zoom = None
+    map_ref = None
+    fig = None
 
     while True:
         if "mqtt_client" in st.session_state:
@@ -72,7 +79,7 @@ async def mqtt_periodic():  # test, cols, strt_map, anom_map):
             if boxbox_dict is not None:
                 boxbox_dict = boxbox_dict.replace("'", '"')
                 dict_str.text(f"boxbox_dict: {boxbox_dict}")
-                st.text(f"box tye: {type(boxbox_dict)}")
+                # st.text(f"box tye: {type(boxbox_dict)}")
                 box_data = json.loads(boxbox_dict)
 
                 # Update data in columns
@@ -84,18 +91,54 @@ async def mqtt_periodic():  # test, cols, strt_map, anom_map):
                 col5.metric("Uptime", box_data["up_time"])
 
                 # Plot lat/lon
-                lat, lon = float(box_data['lat']), float(box_data['long'])
+                lat, lon, lat_pred, lon_pred = float(box_data['lat']), float(box_data['long']), \
+                                               float(box_data['lat_pred']), float(box_data['long_pred'])
                 if lat_lons is None:
-                    lat_lons = np.array([[lat, lon]])
-                    lat_lons = np.append(lat_lons, [[lat, lon]], axis=0)
-                    lat_lons = np.append(lat_lons, [[lat, lon]], axis=0)
+                    lat_lons = np.array([[lat, lon, lat_pred, lon_pred]])
+                    lat_lons = np.append(lat_lons, [[lat, lon, lat_pred, lon_pred]], axis=0)
+                    lat_lons = np.append(lat_lons, [[lat, lon, lat_pred, lon_pred]], axis=0)
                 else:
-                    lat_lons = np.append(lat_lons, [[lat, lon]], axis=0)
+                    lat_lons = np.append(lat_lons, [[lat, lon, lat_pred, lon_pred]], axis=0)
 
-                st.write(f'np: {lat_lons.shape}')
-                df = pd.DataFrame(lat_lons, columns=['lat', 'lon'])
-                st.write(f'df: {df.shape}')
-                strt_map.map(df)
+                df = pd.DataFrame(lat_lons, columns=['lat', 'lon', 'lat_pred', 'lon_pred'])
+                # st.map
+                # if zoom is None:
+                #     map_ref = strt_map.map(df)
+                #     st.write(f"street map info: {map_ref}")
+                # else:
+                #     strt_map.map(df, zoom=9, use_container_width=False)
+
+                if zoom is None:
+                    # map_ref = strt_map.map(df)
+                    get_pdk(strt_map, df, center_lat=lat, center_lon=lon)
+                    st.write(f"street map info: {map_ref}")
+                else:
+                    # strt_map.map(df, zoom=9, use_container_width=False)
+                    get_pdk(strt_map, df, center_lat=lat, center_lon=lon)
+
+                # if fig is not None:
+                #     # st.write(f'range: {fig["layout"]}')
+                #     st.write(f'mapbox: {fig["layout"]["mapbox"]}')
+                #     st.write(f'zoom: {fig["layout"]["mapbox"]["zoom"]}')
+                #     # st.write(f'range: {fig["layout"]["xaxis"]["range"]}')
+                #     # [xrange_0, xrange_1] = fig["layout"]["xaxis"]["range"]
+                #     zoom = fig["layout"]["mapbox"]["zoom"]
+                #     st.write(f"curr zoom: {zoom}")
+                #
+                # fig = px.scatter_mapbox(df, lat="lat", lon="lon", center={"lat": lat, "lon": lon},
+                #                         width=600, height=600)
+                #
+                # fig.update_layout(mapbox_style="open-street-map")
+                #
+                # if zoom is not None:
+                #     # fig['layout']["xaxis"]["range"] = [xrange_0, xrange_1]
+                #     if zoom == 8:
+                #         zoom += 0.1
+                #     fig["layout"]["mapbox"]["zoom"] = zoom
+                #     st.write(f"setting zoom to {zoom}")
+                #     st.write(f"strt_map zoom: {strt_map.getZoom()}")
+                #
+                # strt_map.plotly_chart(fig) #, use_container_width=True)
 
                 boxbox_dict = None
         else:
@@ -142,7 +185,9 @@ if re_init_mqtt is True and box_select is not None:
     st.session_state.mqtt_client = get_mqtt_client(MQTT_UN, MQTT_PW, MQTT_CONN_STR, on_connect, on_message=on_message)
     st.session_state.mqtt_client.on_subscribe = on_subscribe
     st.session_state.mqtt_client.on_message = on_message
-    st.session_state.mqtt_client.subscribe("boxbox/ground", qos=1)
+
+    # st.session_state.mqtt_client.subscribe("boxbox/ground", qos=1)
+    st.session_state.mqtt_client.subscribe(box_select, qos=1)
 
     st.write("Finished initializing mqtt client")
     sleep(4.0)
