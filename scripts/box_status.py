@@ -3,52 +3,19 @@ import sys
 dir_path = os.getcwd()
 sys.path.append(dir_path)
 
-import time
 from time import sleep
-
 import numpy as np
 import streamlit as st
 # import yaml
-from paho.mqtt import client as mqtt
-import paho.mqtt.client as paho
 
 from scripts.mqtt import get_mqtt_client
 from scripts.helpers import get_config
 
 
-CONFIG_FILE_PATH = os.getenv("MQTT_BOXBOX_CONFIG", "./config/config.yml")
-CONFIG = get_config(CONFIG_FILE_PATH)
-
-MQTT_BROKER = CONFIG["mqtt"]["broker"]
-MQTT_PORT = CONFIG["mqtt"]["port"]
-MQTT_QOS = CONFIG["mqtt"]["QOS"]
-MQTT_UN = CONFIG["mqtt"]["un"]
-MQTT_PW = CONFIG["mqtt"]["pw"]
-MQTT_CONN_STR = CONFIG["mqtt"]["connect_str"]
-
-MQTT_TOPIC = CONFIG["boxbox"]["mqtt_topic"]
-
-VIEWER_WIDTH = 600
-
-title = st.title(MQTT_TOPIC)
-
 
 def st_print(text):
     st.text(text)
 
-
-# print which topic was subscribed to
-def on_subscribe(client, userdata, mid, granted_qos, properties=None):
-    st_print("-"*100)
-    st_print("Subscribed: " + str(mid) + " " + str(granted_qos))
-    st_print("User data: ")
-    st_print("-" * 100)
-
-
-# Initialize MQTT connection
-st_print(st.session_state)
-tf = 'mqtt_client' not in st.session_state
-st_print(str(tf))
 
 # print message, useful for checking if it was successful
 def on_message(client, userdata, msg):
@@ -74,6 +41,24 @@ def on_connect(client, userdata, flags, rc, properties=None):
 
 def on_publish(client, userdata, mid):
     st_print("mid: " + str(mid))
+
+
+VIEWER_WIDTH = 600
+
+title = st.title("BoxBox Status")
+
+config = get_config("./config/config.yml")
+st_print(str(config['topics']))
+
+# Initialize MQTT connection
+st_print(st.session_state)
+tf = 'mqtt_client' not in st.session_state
+st_print(str(tf))
+
+# Let user select which box to listen to
+box_select = st.selectbox('BoxBox Selection:', config['topics'])
+st.write('Selection: ', box_select)
+
 
 #
 # def get_mqtt_client():
@@ -108,17 +93,18 @@ st_print("test print")
 
 # viewer = st.image(get_random_numpy(), width=VIEWER_WIDTH)
 
+MQTT_UN = st.secrets["MQTT_UN"]
+MQTT_PW = st.secrets["MQTT_PW"]
+MQTT_CONN_STR = st.secrets["MQTT_CONN_STR"]
+
+
 def main():
-    # client = get_mqtt_client()
-    # client.on_message = on_message
-    # client.connect(MQTT_BROKER, port=MQTT_PORT)
-    # client.subscribe(MQTT_TOPIC)
-    # time.sleep(4)  # Wait for connection setup to complete
-    # client.loop_forever()
+    # To restart client, 'Stop' the streamlit from running and refresh the page
 
     # if 'mqtt_client' not in st.session_state:
     st_print("Initializing mqtt client.")
-    mqtt_client = get_mqtt_client(on_connect)
+    # (mqtt_un, mqtt_pw, mqtt_conn_str, on_connect=None,
+    mqtt_client = get_mqtt_client(MQTT_UN, MQTT_PW, MQTT_CONN_STR, on_connect, on_message=on_message)
     mqtt_client.on_subscribe = on_subscribe
     mqtt_client.on_message = on_message
     mqtt_client.subscribe("boxbox/ground", qos=1)

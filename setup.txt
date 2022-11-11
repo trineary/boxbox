@@ -1,0 +1,6 @@
+
+pip install streamlit
+pip install paho-mqtt
+pip install pyyaml
+
+

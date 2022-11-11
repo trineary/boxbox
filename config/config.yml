@@ -1,0 +1,9 @@
+
+topics:
+  - boxbox/AQube
+  - boxbox/ArctiQ_Tern
+
+
+#processing:
+#  subscribe_topic: homie/mac_webcam/capture
+#  publish_topic: homie/mac_webcam/capture/rotated
