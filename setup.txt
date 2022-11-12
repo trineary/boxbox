@@ -3,4 +3,8 @@ pip install streamlit
 pip install paho-mqtt
 pip install pyyaml
 pip install plotly
+pip install pipreqs
+
+# To update requirements.txt file
+pipreqs --force ~/Projects/boxbox
 
