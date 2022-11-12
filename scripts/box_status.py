@@ -157,7 +157,7 @@ if re_init_mqtt is True and box_select is not None:
     st.session_state.mqtt_client.on_message = on_message
     st.session_state.mqtt_client.subscribe(box_select, qos=1)
 
-    sleep(4.0)
+    sleep(0.5)
 
 asyncio.run(mqtt_periodic())
 st_print("post asyncio")
