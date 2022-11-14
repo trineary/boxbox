@@ -56,6 +56,7 @@ async def mqtt_periodic():
     global boxbox_dict
     global auto_center
     global show_predicted
+    global max_crumbs
 
     empty_cols = st.empty()
     col1, col2, col3, col4, col5 = empty_cols.columns(5)
@@ -114,6 +115,9 @@ async def mqtt_periodic():
                 else:
                     lat_lons = np.append(lat_lons, [[gps_lat, gps_lon, pred_lat, pred_lon]], axis=0)
 
+                if len(lat_lons) > max_crumbs:
+                    lat_lons = lat_lons[-max_crumbs:]
+
                 df = pd.DataFrame(lat_lons, columns=['gps_lat', 'gps_lon', 'pred_lat', 'pred_lon'])
 
                 get_pdk(strt_map, df, center_lat=gps_lat, center_lon=gps_lon, zoom=map_zoom, pitch=map_pitch,
@@ -143,6 +147,8 @@ MQTT_PW = st.secrets["MQTT_PW"]
 MQTT_CONN_STR = st.secrets["MQTT_CONN_STR"]
 
 re_init_mqtt = False
+
+max_crumbs = 120
 
 if 'mqtt_client' not in st.session_state:
     re_init_mqtt = True
