@@ -58,16 +58,17 @@ async def mqtt_periodic():
     global show_predicted
     global max_crumbs
 
-    empty_cols = st.empty()
-    col1, col2, col3 = empty_cols.columns(3)
+    cnt_cols = st.empty()
+    col1, col2, col3 = cnt_cols.columns(3)
     col1.metric("VMR Cnt", "0")
     col2.metric("MFAM Cnt", "0")
     col3.metric("VN3xx Cnt", "0")
 
-    col1, col2, col3 = empty_cols.columns(3)
-    col1.metric("Sat Cnt", 0)
-    col2.metric("Air Temp", 0)
-    col3.metric("Uptime", 0)
+    data_cols = st.empty()
+    col1, col2, col3 = data_cols.columns(3)
+    col1.metric("Sat Cnt", "0")
+    col2.metric("Air Temp", "0")
+    col3.metric("Uptime", "0")
 
     gps_cols = st.empty()
     col1, col2 = gps_cols.columns(2)
@@ -95,12 +96,12 @@ async def mqtt_periodic():
                 box_data = json.loads(boxbox_dict)
 
                 # Update data in columns
-                col1, col2, col3 = empty_cols.columns(3)
+                col1, col2, col3 = cnt_cols.columns(3)
                 col1.metric("VMR Cnt", box_data["VMR_PUB_Cnt"])
                 col2.metric("MFAM Cnt", box_data["VN3xx_PUB_Cnt"])
                 col3.metric("VN3xx Cnt", box_data["MFAM_PUB_Cnt"])
 
-                col1, col2, col3 = empty_cols.columns(3)
+                col1, col2, col3 = data_cols.columns(3)
                 col1.metric("Sat Cnt", box_data["num_sats"])
                 col2.metric("Air Temp", box_data["air_temp"])
                 col3.metric("Uptime", box_data["up_time"])
