@@ -53,6 +53,9 @@ async def mqtt_periodic():
     map_pitch = 25
 
     global boxbox_dict
+    global auto_center
+    global show_predicted
+
     empty_cols = st.empty()
     col1, col2, col3, col4, col5 = empty_cols.columns(5)
     col1.metric("VMR Cnt", "0")
@@ -113,7 +116,7 @@ async def mqtt_periodic():
                 df = pd.DataFrame(lat_lons, columns=['gps_lat', 'gps_lon', 'pred_lat', 'pred_lon'])
 
                 get_pdk(strt_map, df, center_lat=gps_lat, center_lon=gps_lon, zoom=map_zoom, pitch=map_pitch,
-                        map_style='road')
+                        map_style='road', show_predicted=show_predicted)
 
                 boxbox_dict = None
         else:
@@ -129,6 +132,10 @@ config = get_config("./config/config.yml")
 
 # Let user select which box to listen to
 box_select = st.selectbox('BoxBox Selection:', config['topics'])
+
+# Allow some options
+# auto_center = st.checkbox("Auto-center GPS Lat/Lon")
+show_predicted = st.checkbox("Show predicted Lat/Lon")
 
 MQTT_UN = st.secrets["MQTT_UN"]
 MQTT_PW = st.secrets["MQTT_PW"]
