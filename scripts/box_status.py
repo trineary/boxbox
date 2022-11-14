@@ -31,14 +31,15 @@ def on_message(client, userdata, msg):
 # print which topic was subscribed to
 def on_subscribe(client, userdata, mid, granted_qos, properties=None):
     # st_print("MQTT subscribed successful: " + str(mid) + " " + str(granted_qos))
-    st_print(f"MQTT subscribed successful: {userdata}")
+    # st_print(f"MQTT subscribe successful: {userdata}")
     # st_print(f"User data: {userdata}")
+    pass
 
 
 def on_connect(client, userdata, flags, rc, properties=None):
     # st_print(f"CONNACK received with code {type(rc)}, {str(rc)}")
     if str(rc) == "Success":
-        st_print("MQTT connected to broker")
+        # st_print("MQTT connected to broker")
         client.connected_flag = True  # set flag
     else:
         st_print(f"Bad connection to MQTT broker, returned code={rc}")
@@ -86,7 +87,7 @@ async def mqtt_periodic():
             test.text(f"Uptime loop: {int((datetime.datetime.now() - start_time).seconds)} secs")
             if boxbox_dict is not None:
                 boxbox_dict = boxbox_dict.replace("'", '"')
-                dict_str.text(f"boxbox_dict: {boxbox_dict}")
+                # dict_str.text(f"boxbox_dict: {boxbox_dict}")
                 box_data = json.loads(boxbox_dict)
 
                 # Update data in columns
@@ -156,7 +157,7 @@ if "box_select" in st.session_state:
 if re_init_mqtt is True and box_select is not None:
     if "mqtt_client" in st.session_state:
         st.session_state.mqtt_client.loop_stop(force=True)
-        st.write("Stopping mqtt before restarting")
+        # st.write("Stopping mqtt before restarting")
 
     # Reinitialize mqtt if it hasn't been initialized or if it has changed
     st.session_state.mqtt_client = get_mqtt_client(MQTT_UN, MQTT_PW, MQTT_CONN_STR, on_connect, on_message=on_message)
