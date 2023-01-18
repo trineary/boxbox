@@ -60,10 +60,12 @@ async def mqtt_periodic():
     global max_crumbs
 
     cnt_cols = st.empty()
-    col1, col2, col3 = cnt_cols.columns(3)
+    col1, col2, col3, col4, col5 = cnt_cols.columns(5)
     col1.metric("VMR Cnt", "0")
     col2.metric("MFAM Cnt", "0")
     col3.metric("VN3xx Cnt", "0")
+    col4.metric("RAM %", "0")
+    col5.metric("CPU %", "0")
 
     data_cols = st.empty()
     col1, col2, col3, col4 = data_cols.columns(4)
@@ -118,13 +120,17 @@ async def mqtt_periodic():
                 box_data = json.loads(boxbox_dict)
 
                 # Update data in columns
-                col1, col2, col3 = cnt_cols.columns(3)
+                col1, col2, col3, col4, col5 = cnt_cols.columns(5)
                 if "VMR_PUB_Cnt" in box_data: col1.metric("VMR Cnt/sec", box_data["VMR_PUB_Cnt"])
                 else: col1.metric("VMR Cnt", -1)
                 if "MFAM_PUB_Cnt" in box_data: col2.metric("MFAM Cnt/sec", box_data["MFAM_PUB_Cnt"])
                 else: col2.metric("MFAM Cnt", -1)
                 if "VN3xx_PUB_Cnt" in box_data: col3.metric("VN3xx Cnt/sec", box_data["VN3xx_PUB_Cnt"])
                 else: col3.metric("VN3xx Cnt", -1)
+                if "ram_load" in box_data: col4.metric("RAM %", box_data["ram_load"])
+                else: col4.metric("RAM %", -1)
+                if "cpu_load" in box_data: col5.metric("CPU %", box_data["cpu_load"])
+                else: col5.metric("CPU %", -1)
 
                 col1, col2, col3, col4 = data_cols.columns(4)
                 if "num_sats" in box_data: col1.metric("Sat Cnt", box_data["num_sats"])
