@@ -105,6 +105,8 @@ async def mqtt_periodic():
     dict_str = st.empty()
     lat_lons = None
 
+    log_stream = st.empty()
+
     flt_aware = st.empty()
     # "https://www.planeflighttracker.com/2013/12/flight-number-search.html"
     # components.iframe("https://www.planeflighttracker.com/2013/12/flight-number-search.html", width=675, height=410)
@@ -194,6 +196,11 @@ async def mqtt_periodic():
 
                 get_pdk(strt_map, df, center_lat=gps_lat, center_lon=gps_lon, zoom=map_zoom, pitch=map_pitch,
                         map_style='road', show_predicted=show_predicted)
+
+                if "log_stream" in box_data:  # box_data["log_stream"]
+                    st.text_area(label="BoxBox Logs", value=box_data["log_stream"], height=275)
+                else:
+                    st.text_area(label="BoxBox Logs", value="", height=275)
 
                 boxbox_dict = None
         else:
