@@ -106,11 +106,18 @@ async def mqtt_periodic():
     lat_lons = None
 
     log_stream = st.empty()
+    log_stream.container()
+    # lstream = log_stream.text_area("Log Stream", "", height=257)
+    # lstream.
+    lstream_text = ""
 
-    flt_aware = st.empty()
+    # flt_aware = st.empty()
+    # mock_data = "line 1 data\nline 2 data\nline 3 data\nline 4 data\nline 5 data\nline 6 data\nline 7 data\nline 8 data\n" \
+    #             "line 3 data\nline 3 data\nline 3 data\nline 3 data\nline 3 data\nline 3 data\nline 3 data\nline 3 data"
+    # st.text_area(label="BoxBox Logs", value=mock_data, height=150,)
     # "https://www.planeflighttracker.com/2013/12/flight-number-search.html"
     # components.iframe("https://www.planeflighttracker.com/2013/12/flight-number-search.html", width=675, height=410)
-    components.iframe("http://embed.flightaware.com/commercial/integrated/web/delay_map.rvt", width=675, height=410)
+    # components.iframe("http://embed.flightaware.com/commercial/integrated/web/delay_map.rvt", width=675, height=410)
 
     while True:
         if "mqtt_client" in st.session_state:
@@ -197,10 +204,17 @@ async def mqtt_periodic():
                 get_pdk(strt_map, df, center_lat=gps_lat, center_lon=gps_lon, zoom=map_zoom, pitch=map_pitch,
                         map_style='road', show_predicted=show_predicted)
 
-                if "log_stream" in box_data:  # box_data["log_stream"]
-                    st.text_area(label="BoxBox Logs", value=box_data["log_stream"], height=275)
-                else:
-                    st.text_area(label="BoxBox Logs", value="", height=275)
+                # st.write(box_data["log_stream"])
+                # lstream_text += box_data["log_stream"]
+                # log_stream.write(lstream_text)
+                # lstream = log_stream()
+                # mock_data = "line 1 data\nline 2 data\nline 3 data"
+                # st.text_area(label="BoxBox Logs", value=mock_data, height=275)
+                # if "log_stream" in box_data:  # box_data["log_stream"]
+                #     l_stream = log_stream.text_area(label="BoxBox Logs", value=box_data["log_stream"], height=275))
+                #     st.text_area(label="BoxBox Logs", value=box_data["log_stream"], height=275)
+                # else:
+                #     st.text_area(label="BoxBox Logs", value="", height=275)
 
                 boxbox_dict = None
         else:
